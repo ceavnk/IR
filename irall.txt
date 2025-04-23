@@ -1,0 +1,625 @@
+# 1A: Inverted Index Construction and Retrieval System
+
+from collections import defaultdict
+
+# Sample documents
+from collections import defaultdict  # ✅ Required import
+
+docs = {
+    "doc1": "The computer science students are appearing for practical examination.",
+    "doc2": "computer science practical examination will start tomorrow."
+}
+
+# Preprocessing & index building
+def build_inverted_index(docs):
+    index = defaultdict(list)
+    for doc_id, text in docs.items():
+        words = text.lower().split()
+        for word in set(words):
+            index[word].append(doc_id)
+    return index
+
+# Retrieve documents for query terms
+def retrieve_documents(index, query_terms):
+    result = set(index.get(query_terms[0], []))
+    for term in query_terms[1:]:
+        result &= set(index.get(term, []))  # AND query
+    return result
+
+inverted_index = build_inverted_index(docs)
+query = ["computer", "science"]
+result = retrieve_documents(inverted_index, query)
+print("Inverted Index:", dict(inverted_index))
+print("Query Result:", result)
+
+
+
+
+# 1B: Question Answering using Information Extraction
+
+corpus = {
+    "doc1": "Tiger is the national animal of India.",
+    "doc2": "Peacock is the national bird of India.",
+    "doc3": "Mango is the national fruit of India."
+}
+
+def answer_question(question, corpus):
+    for doc in corpus.values():
+        if "national bird" in question.lower() and "national bird" in doc.lower():
+            return doc.split("is")[-1].strip().rstrip(".")
+    return "Answer not found"
+
+question = "Which is the national bird of India?"
+answer = answer_question(question, corpus)
+print("Answer:", answer)
+
+
+
+
+
+# 2A: Spelling Correction using Edit Distance
+
+def edit_distance(str1, str2):
+    m, n = len(str1), len(str2)
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    for i in range(m+1):
+        for j in range(n+1):
+            if i == 0: dp[i][j] = j
+            elif j == 0: dp[i][j] = i
+            elif str1[i-1] == str2[j-1]:
+                dp[i][j] = dp[i-1][j-1]
+            else:
+                dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
+    return dp[m][n]
+
+print("Edit Distance:", edit_distance("nature", "creature"))
+
+
+
+# 2B: Boolean Retrieval Model
+
+docs = {
+    "doc1": "The cat chased the dog around the garden.",
+    "doc2": "She was sitting in the garden last night.",
+    "doc3": "I read the book the night before."
+}
+
+def boolean_retrieval(docs, query_terms):
+    result = []
+    for doc_id, text in docs.items():
+        text = text.lower()
+        if any(term in text for term in query_terms):
+            result.append(doc_id)
+    return result
+
+query = ["garden", "night"]
+print("Matching Docs:", boolean_retrieval(docs, query))
+
+
+
+
+
+# 3A: Web Crawler (Basic)
+
+import requests
+from bs4 import BeautifulSoup
+
+def simple_crawler(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    return soup.title.string if soup.title else "No Title", soup.get_text()
+
+title, content = simple_crawler("https://example.com")
+print("Title:", title)
+
+
+
+
+# 3B: Crawler Challenges (robots.txt, delay)
+
+import time
+import urllib.robotparser
+
+def check_robots_txt(base_url, user_agent="*"):
+    rp = urllib.robotparser.RobotFileParser()
+    rp.set_url(base_url + "/robots.txt")
+    rp.read()
+    return rp.can_fetch(user_agent, base_url)
+
+print("Allowed:", check_robots_txt("https://example.com"))
+
+# Simulating crawl delay
+print("Fetching after delay...")
+time.sleep(2)  # delay of 2 seconds
+
+
+
+
+
+
+# 4A: PageRank Algorithm
+
+def pagerank(graph, d=0.85, iterations=100):
+    nodes = graph.keys()
+    n = len(nodes)
+    ranks = {node: 1/n for node in nodes}
+
+    for _ in range(iterations):
+        new_ranks = {}
+        for node in nodes:
+            incoming = [src for src, dsts in graph.items() if node in dsts]
+            rank_sum = sum(ranks[src]/len(graph[src]) for src in incoming)
+            new_ranks[node] = (1 - d)/n + d * rank_sum
+        ranks = new_ranks
+    return ranks
+
+web_graph = {
+    "A": ["B", "C", "D"],
+    "B": ["C", "E"],
+    "C": ["A", "D"],
+    "D": [],
+    "E": []
+}
+
+print("PageRank:", pagerank(web_graph))
+
+
+
+
+# 4B: Extractive Text Summarization
+
+import nltk
+from nltk.tokenize import sent_tokenize
+from sklearn.feature_extraction.text import CountVectorizer
+import numpy as np
+
+nltk.download('punkt')
+text = """
+Natural language processing is a field of computer science, AI and linguistics.
+NLP involves natural language understanding and generation.
+Text summarization distills important info from source.
+"""
+
+sentences = sent_tokenize(text)
+cv = CountVectorizer().fit_transform(sentences)
+similarity_matrix = (cv * cv.T).toarray()
+scores = similarity_matrix.sum(axis=1)
+ranked = np.argsort(scores)[::-1]
+summary = [sentences[i] for i in ranked[:2]]
+print("Summary:", " ".join(summary))
+
+
+
+
+
+# 5A: Cosine Similarity
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+def cosine_similarity_query():
+    query = "gold silver truck"
+    document = "shipment of gold damaged in a gold fire"
+    vectorizer = CountVectorizer().fit_transform([query, document])
+    vectors = vectorizer.toarray()
+    cos_sim = cosine_similarity([vectors[0]], [vectors[1]])[0][0]
+    return cos_sim
+
+# Call the function and print the result
+similarity_score = cosine_similarity_query()
+print("Cosine Similarity:", similarity_score).
+
+
+
+
+
+# 5B: Question Answering using Information Extraction
+
+corpus = {
+    "doc1": "Tiger is the national animal of India.",
+    "doc2": "Peacock is the national bird of India.",
+    "doc3": "Mango is the national fruit of India."
+}
+
+def answer_question(question, corpus):
+    for doc in corpus.values():
+        if "national bird" in question.lower() and "national bird" in doc.lower():
+            return doc.split("is")[-1].strip().rstrip(".")
+    return "Answer not found"
+
+question = "Which is the national bird of India?"
+answer = answer_question(question, corpus)
+print("Answer:", answer)
+
+
+
+
+
+
+10
+# 6A: Precision, Recall, F1-Score (TP=60, FP=30, FN=20)
+def eval_metrics(tp=60, fp=30, fn=20):
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    f1 = 2 * (precision * recall) / (precision + recall)
+    return precision, recall, f1
+
+precision, recall, f1 = eval_metrics()
+print(f"Precision: {precision:.2f}, Recall: {recall:.2f}, F1-Score: {f1:.2f}")
+
+
+
+# 6B: Evaluation Toolkit Example
+from sklearn.metrics import average_precision_score
+
+def evaluation_toolkit():
+    y_true = [0, 1, 1, 0, 1]
+    y_scores = [0.1, 0.8, 0.6, 0.3, 0.9]
+    avg_prec = average_precision_score(y_true, y_scores)
+    return avg_prec
+
+print(f"Average Precision Score: {evaluation_toolkit():.2f}")
+
+
+
+
+
+
+
+9
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+def tfidf_vector_space():
+    documents = [
+        "Document about python programming language and data analysis.",
+        "Document discussing machine learning algorithms and programming techniques.",
+        "Overview of natural language processing and its applications."
+    ]
+    query = ["python programming"]
+    vectorizer = TfidfVectorizer()
+    vectors = vectorizer.fit_transform(documents + query)
+    return cosine_similarity(vectors[-1], vectors[:-1]).flatten()
+
+# Call and print the result
+similarities = tfidf_vector_space()
+for i, score in enumerate(similarities):
+    print(f"Cosine similarity between Query and Document {i+1}: {score:.4f}")
+
+
+
+
+
+# 7B:Cosine Similarity with TF-IDF Vectors
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+def tfidf_vector_space():
+    documents = [
+        "Document about python programming language and data analysis.",
+        "Document discussing machine learning algorithms and programming techniques.",
+        "Overview of natural language processing and its applications."
+    ]
+    query = ["python programming"]
+    vectorizer = TfidfVectorizer()
+    vectors = vectorizer.fit_transform(documents + query)
+    return vectors
+
+# Call the function and get the vectors
+vectors = tfidf_vector_space()
+
+# Compute cosine similarities (last vector is the query, others are documents)
+cosine_similarities = cosine_similarity(vectors[-1], vectors[:-1]).flatten()
+
+# Print similarity scores
+for i, score in enumerate(cosine_similarities):
+    print(f"Cosine similarity between Query and Document {i+1}: {score:.4f}")
+
+
+
+
+
+
+16
+# 8A: K-means Clustering on Documentsfrom sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import KMeans
+
+def document_clustering():
+    docs = [
+        "Machine learning is the study of computer algorithms that improve through experience.",
+        "Deep learning is a subset of machine learning.",
+        "Natural language processing is a field of artificial intelligence.",
+        "Computer vision enables computers to interpret the visual world.",
+        "Reinforcement learning is a machine learning algorithm.",
+        "Information retrieval is the process of obtaining information from a collection.",
+        "Text mining derives high-quality information from text.",
+        "Data clustering divides a set of objects into groups.",
+        "Hierarchical clustering builds a tree of clusters.",
+        "K-means clustering is a method of vector quantization."
+    ]
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(docs)
+    model = KMeans(n_clusters=3, random_state=42)
+    labels = model.fit_predict(X)
+    return labels
+
+# Call the function and print the result
+labels = document_clustering()
+print("Cluster Labels:", labels)
+
+
+
+
+
+
+# 8B: Classification Evaluation
+from sklearn.metrics import precision_score, recall_score, f1_score
+
+def classification_metrics():
+    y_true = [0, 1, 1, 0, 1]
+    y_pred = [0, 1, 1, 0, 1]
+    precision = precision_score(y_true, y_pred)
+    recall = recall_score(y_true, y_pred)
+    f1 = f1_score(y_true, y_pred)
+    return precision, recall, f1
+
+# Call the function and print the result
+precision, recall, f1 = classification_metrics()
+print(f"Precision: {precision:.4f}, Recall: {recall:.4f}, F1-Score: {f1:.4f}")
+
+
+
+
+
+2
+#9:Implement an inverted index for:
+
+docs = {
+    "Doc1": "The quick brown fox jumped over the lazy dog",
+    "Doc2": "The lazy dog slept in the sun"
+}
+
+# Build inverted index
+index = {}
+for doc, text in docs.items():
+    for word in text.lower().split():
+        index.setdefault(word, set()).add(doc)
+
+# Search for terms "lazy" and "sun"
+search_terms = ["lazy", "sun"]
+matching_docs = set(docs.keys())  # Start with all docs
+
+# Intersect docs for each search term
+for term in search_terms:
+    matching_docs &= index.get(term, set())
+
+print("Matching docs:", matching_docs)
+
+
+
+
+
+#8B:Boolean retrieval model:
+
+# Documents
+docs = {
+    "D1": "BSc lectures start at 7.",
+    "D2": "My lectures are over.",
+    "D3": "Today is a holiday."
+}
+
+# Normalize and tokenize
+inverted_index = {}
+for doc_id, text in docs.items():
+    for word in text.lower().strip('.').split():
+        inverted_index.setdefault(word, set()).add(doc_id)
+
+# Boolean NOT query
+all_docs = set(docs.keys())
+not_lectures = all_docs - inverted_index.get("lectures", set())
+
+print("Matching documents:", not_lectures)
+
+
+#11:Classification using Naïve Bayes on 20_newsgroups (Positive vs Negative Sentiment)
+
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report
+
+# Load 2 categories to simulate binary sentiment
+categories = ['rec.sport.baseball', 'talk.politics.misc']
+data = fetch_20newsgroups(subset='train', categories=categories, remove=('headers', 'footers', 'quotes'))
+
+# Vectorize text
+vectorizer = CountVectorizer(stop_words='english')
+X = vectorizer.fit_transform(data.data)
+y = data.target  # 0 = baseball (positive), 1 = politics (negative)
+
+# Train Naïve Bayes classifier
+model = MultinomialNB()
+model.fit(X, y)
+
+# Evaluate
+y_pred = model.predict(X)
+print("Naïve Bayes Classification Report:")
+print(classification_report(y, y_pred, target_names=data.target_names))
+
+
+
+
+
+#11B:Classification using SVM on 20_newsgroups (Multiclass: e.g., alt.atheism, etc.)
+
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.svm import SVC
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import classification_report
+
+# Load multiple categories
+categories = ['alt.atheism', 'comp.graphics', 'sci.space', 'talk.religion.misc']
+data = fetch_20newsgroups(subset='train', categories=categories, remove=('headers', 'footers', 'quotes'))
+
+# SVM pipeline: TF-IDF + SVC
+model = make_pipeline(TfidfVectorizer(stop_words='english'), SVC(kernel='linear'))
+model.fit(data.data, data.target)
+
+# Predict & evaluate
+y_pred = model.predict(data.data)
+print("SVM Classification Report:")
+print(classification_report(data.target, y_pred, target_names=data.target_names))
+
+
+
+
+
+#12: Question Answering System using TF-IDF and Cosine Similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+corpus = [
+    "India has the second-largest population in the world.",
+    "Tiger is the national animal of India.",
+    "Peacock is the national bird of India.",
+    "Mango is the national fruit of India."
+]
+
+query = "Which is the national bird of India?"
+
+documents = corpus + [query]
+
+vectorizer = TfidfVectorizer()
+tfidf_matrix = vectorizer.fit_transform(documents)
+
+cosine_similarities = cosine_similarity(tfidf_matrix[-1], tfidf_matrix[:-1]).flatten()
+
+best_match_index = cosine_similarities.argmax()
+best_answer = corpus[best_match_index]
+
+print("Query:", query)
+print("Answer:", best_answer)
+
+
+
+#13:pageRank algorithm
+import numpy as np
+
+# 📄 Pages: A, B, C, D
+pages = ['A', 'B', 'C', 'D']
+n = len(pages)
+
+# 🔗 Link Structure: Define who links to whom
+links = {
+    'A': ['B', 'C'],
+    'B': ['C', 'D'],
+    'C': ['A', 'D'],
+    'D': ['B']
+}
+
+# Build the link matrix M (n x n)
+M = np.zeros((n, n))
+
+for i, page in enumerate(pages):
+    targets = links[page]
+    if targets:
+        for target in targets:
+            j = pages.index(target)
+            M[j, i] = 1 / len(targets)  # Distribute rank evenly
+
+# 🔁 PageRank iteration
+d = 0.85  # damping factor
+r = np.ones(n) / n  # initial rank (uniform distribution)
+
+# Iterate until convergence (100 iterations in this case)
+for _ in range(100):
+    r_new = (1 - d) / n + d * np.dot(M, r)
+    
+    # Check for convergence (stop if the rank vector does not change much)
+    if np.linalg.norm(r_new - r, 1) < 1e-6:
+        break
+    r = r_new
+
+# 📊 Output final PageRank scores
+for i, score in enumerate(r):
+    print(f"Page {pages[i]}: {score:.4f}")
+
+
+
+
+# ==================== 17B: Document Retrieval for "class meeting" ====================
+docs = {
+    "Doc1": "The class meeting was held on Monday.",
+    "Doc2": "A group of students met after the class.",
+    "Doc3": "Meeting for the upcoming event will be scheduled next week."
+}
+
+query_terms = ["class", "meeting"]
+result_docs = set(docs.keys())
+
+for term in query_terms:
+    result_docs &= {doc for doc, text in docs.items() if term in text.lower()}
+
+print("\nDocuments containing 'class' and 'meeting':", result_docs)
+
+# ==================== 18A: TF-IDF Vector Space Model ====================
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+corpus = [
+    "The sun is the star at the center of the solar system.",
+    "She wore a beautiful dress to the party last night.",
+    "The book on the table caught my attention immediately."
+]
+query = ["solar system"]
+
+vectorizer = TfidfVectorizer()
+X = vectorizer.fit_transform(corpus + query)
+
+print("\nTF-IDF Matrix:")
+print(X.toarray())
+
+# ==================== 18B: Clustering with KMeans ====================
+from sklearn.cluster import KMeans
+
+kmeans = KMeans(n_clusters=2, random_state=42)
+kmeans.fit(X[:-1])  # exclude query
+
+print("\nCluster Labels for Documents:")
+print(kmeans.labels_)
+
+# ==================== 20A: QA System – "Which is the national bird of India?" ====================
+corpus_qa = {
+    "1": "India has the second-largest population in the world.",
+    "2": "Tiger is the national animal of India.",
+    "3": "Peacock is the national bird of India.",
+    "4": "Mango is the national fruit of India."
+}
+
+question = "Which is the national bird of India?"
+
+# Simple QA using keyword match
+for doc_id, text in corpus_qa.items():
+    if "national bird" in text.lower():
+        print("\nAnswer to QA Query:")
+        print(text)
+        break
+
+# ==================== 20B: Text Summarization (Extractive) ====================
+from sklearn.feature_extraction.text import CountVectorizer
+import numpy as np
+
+text = """
+Natural language processing (NLP) is a field of computer science, artificial intelligence,
+and computational linguistics concerned with the interactions between computers and human languages.
+Many challenges in NLP involve natural language understanding, generation, and machine learning.
+Text summarization is the process of distilling the most important information from a source.
+"""
+
+sentences = [s.strip() for s in text.strip().split('\n') if s]
+vectorizer = CountVectorizer().fit_transform(sentences)
+vectors = vectorizer.toarray()
+sentence_scores = np.sum(vectors, axis=1)
+
+top_sentence_index = np.argmax(sentence_scores)
+print("\nSummary (Extractive):")
+print(sentences[top_sentence_index])
